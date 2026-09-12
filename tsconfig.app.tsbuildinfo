@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/alertdetails.tsx","./src/components/alerttable.tsx","./src/components/datefilter.tsx","./src/components/errortypebadge.tsx","./src/components/summarycards.tsx","./src/pages/emailalertdashboard.tsx","./src/services/emailalertapi.ts","./src/types/emailalert.ts"],"version":"5.9.3"}
