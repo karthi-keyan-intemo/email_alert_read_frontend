@@ -1,3 +1,7 @@
+import { Inbox, TrendingUp, AlertTriangle } from 'lucide-react';
+import React from 'react';
+
+
 interface SummaryCardProps {
   label: string;
   value: number;
@@ -5,6 +9,12 @@ interface SummaryCardProps {
 }
 
 function SummaryCard({ label, value, accent = 'blue' }: SummaryCardProps) {
+  const iconMap ={
+    blue: Inbox,
+    amber: AlertTriangle,
+    rose: TrendingUp,
+    slate: Inbox,
+  }
   const accentMap = {
     blue: 'border-sky-200 bg-sky-50 text-sky-700',
     amber: 'border-amber-200 bg-amber-50 text-amber-700',
@@ -14,8 +24,15 @@ function SummaryCard({ label, value, accent = 'blue' }: SummaryCardProps) {
 
   return (
     <div className={`rounded-xl border bg-white p-4 shadow-sm ${accentMap[accent]}`}>
-      <div className="text-sm font-medium text-slate-600">{label}</div>
-      <div className="mt-3 text-3xl font-semibold text-slate-900">{value}</div>
+      <div className="flex items-center justify-between">
+        <div className="text-sm font-medium text-slate-600">{label}</div>
+        <div className="text-3xl font-semibold text-slate-900">
+          {value}
+        </div>
+      </div>
+      <div className="mt-4">
+        {React.createElement(iconMap[accent], { className: `h-6 w-6 ${accentMap[accent].split(' ').slice(-1)}` })}
+      </div>
     </div>
   );
 }

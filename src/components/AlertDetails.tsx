@@ -1,8 +1,9 @@
 import { useState } from 'react';
-
+import { Copy } from 'lucide-react';
 import { updateAzureTask } from '../services/emailAlertApi';
 import { EmailAlertItem } from '../types/emailAlert';
 import { ErrorTypeBadge } from './ErrorTypeBadge';
+import { useAuth } from '../context/AuthContext';
 
 interface AlertDetailsProps {
   alert: EmailAlertItem | null;
@@ -33,10 +34,12 @@ function formatMultiline(value: string | null) {
 }
 
 export function AlertDetails({ alert, onClose, onAlertUpdated }: AlertDetailsProps) {
+  const { hasPermission } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [draftAzureTask, setDraftAzureTask] = useState(alert?.azure_task ?? '');
   const [saving, setSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   if (!alert) {
     return null;
@@ -80,6 +83,20 @@ export function AlertDetails({ alert, onClose, onAlertUpdated }: AlertDetailsPro
       setDraftAzureTask(draftAzureTask);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const copyValue = async (field: string, value: string | null) => {
+    if (!value) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopiedField(field);
+      window.setTimeout(() => setCopiedField((current) => (current === field ? null : current)), 1500);
+    } catch {
+      setStatusMessage(`Unable to copy ${field.toLowerCase()}.`);
     }
   };
 
@@ -133,7 +150,7 @@ export function AlertDetails({ alert, onClose, onAlertUpdated }: AlertDetailsPro
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 md:col-span-2">
               <div className="mb-2 flex items-center justify-between gap-3">
                 <div className="text-xs uppercase tracking-wide text-slate-500">Azure Task</div>
-                {!isEditing ? (
+                {!isEditing && hasPermission('ALERT_EDIT') ? (
                   <button
                     type="button"
                     onClick={handleEditStart}
@@ -144,7 +161,7 @@ export function AlertDetails({ alert, onClose, onAlertUpdated }: AlertDetailsPro
                 ) : null}
               </div>
 
-              {isEditing ? (
+              {isEditing && hasPermission('ALERT_EDIT') ? (
                 <div className="space-y-3">
                   <textarea
                     value={draftAzureTask}
@@ -182,13 +199,37 @@ export function AlertDetails({ alert, onClose, onAlertUpdated }: AlertDetailsPro
               ) : null}
             </div>
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-              <div className="text-xs uppercase tracking-wide text-slate-500">Message ID</div>
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-xs uppercase tracking-wide text-slate-500">Message ID</div>
+                <button
+                  type="button"
+                  disabled={!alert.message_id}
+                  onClick={() => void copyValue('Message ID', alert.message_id)}
+                  aria-label={copiedField === 'Message ID' ? 'Message ID copied' : 'Copy message ID'}
+                  title={copiedField === 'Message ID' ? 'Copied' : 'Copy message ID'}
+                  className={`rounded border bg-white px-2 py-1 text-sm font-semibold transition ${copiedField === 'Message ID' ? 'border-emerald-500 text-emerald-600' : 'border-slate-300 text-slate-700 hover:bg-slate-50'} disabled:cursor-not-allowed disabled:opacity-40`}
+                >
+                  {copiedField === 'Message ID' ? 'Copied' : <Copy className="h-4 w-4" />}
+                </button>
+              </div>
               <div className="mt-2 break-all text-sm font-medium text-slate-900">{alert.message_id || '—'}</div>
             </div>
           </div>
 
           <div className="rounded-xl border border-slate-200 bg-white p-4">
-            <div className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Request IDs</div>
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Request IDs</div>
+              <button
+                type="button"
+                disabled={alert.requests.length === 0}
+                onClick={() => void copyValue('Request IDs', alert.requests.map((request) => request.request_id).join('\n'))}
+                aria-label={copiedField === 'Request IDs' ? 'Request IDs copied' : 'Copy all request IDs'}
+                title={copiedField === 'Request IDs' ? 'Copied' : 'Copy all request IDs'}
+                className={`rounded border bg-white px-2 py-1 text-sm font-semibold transition ${copiedField === 'Request IDs' ? 'border-emerald-500 text-emerald-600' : 'border-slate-300 text-slate-700 hover:bg-slate-50'} disabled:cursor-not-allowed disabled:opacity-40`}
+              >
+                {copiedField === 'Request IDs' ? 'Copied' : <Copy className="h-4 w-4" />}
+              </button>
+            </div>
             <div className="flex flex-wrap gap-2">
               {alert.requests.length > 0 ? (
                 alert.requests.map((request) => (
@@ -206,7 +247,19 @@ export function AlertDetails({ alert, onClose, onAlertUpdated }: AlertDetailsPro
           </div>
 
           <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <div className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Error Message</div>
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Error Message</div>
+              <button
+                type="button"
+                disabled={!alert.error_message}
+                onClick={() => void copyValue('Error Message', alert.error_message)}
+                aria-label={copiedField === 'Error Message' ? 'Error message copied' : 'Copy error message'}
+                title={copiedField === 'Error Message' ? 'Copied' : 'Copy error message'}
+                className={`rounded border bg-white px-2 py-1 text-sm font-semibold transition ${copiedField === 'Error Message' ? 'border-emerald-500 text-emerald-600' : 'border-slate-300 text-slate-700 hover:bg-slate-50'} disabled:cursor-not-allowed disabled:opacity-40`}
+              >
+                {copiedField === 'Error Message' ? 'Copied' : <Copy className="h-4 w-4" />}
+              </button>
+            </div>
             <div className="max-h-80 overflow-auto whitespace-pre-wrap rounded-lg border border-slate-200 bg-slate-950 p-3 font-mono text-sm text-slate-100">
               {formatMultiline(alert.error_message)}
             </div>

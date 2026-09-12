@@ -37,3 +37,92 @@ export interface EmailAlertReadResponse {
   alerts_created: number;
   alerts_skipped: number;
 }
+
+export interface EmailAlertSummary {
+  total_alerts: number;
+  unknown_errors: number;
+  response_validation_errors: number;
+  total_requests: number;
+}
+
+export interface PaginatedEmailAlerts {
+  items: EmailAlertItem[];
+  page: number;
+  page_size: number;
+  total: number;
+  total_pages: number;
+  summary: EmailAlertSummary;
+}
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  full_name: string;
+  roles: string[];
+  permissions: string[];
+}
+
+export interface LoginResponse {
+  access_token: string;
+  token_type: string;
+  user: AuthUser;
+}
+
+export interface AnalyticsResponse {
+  summary: AnalyticsSummary;
+  trend: TrendPoint[];
+  error_type_distribution: ErrorTypeDistribution[];
+  by_source: SourceAnalytics[];
+  by_environment: EnvironmentAnalytics[];
+  top_errors: TopRecurringError[];
+  source_error_type: SourceErrorType[];
+  recent_alerts: EmailAlertItem[];
+}
+
+export interface AnalyticsSummary {
+  total_alerts: number;
+  total_requests: number;
+  unknown_errors: number;
+  response_validation_errors: number;
+  unique_sources: number;
+  unique_environments: number;
+}
+
+export interface TrendPoint {
+  date: string;
+  total: number;
+  unknown: number;
+  response_validation: number;
+}
+
+export interface ErrorTypeDistribution {
+  error_type: string;
+  count: number;
+}
+
+export interface SourceAnalytics {
+  source_name: string | null;
+  alerts: number;
+  requests: number;
+  unknown: number;
+  response_validation: number;
+}
+
+export interface EnvironmentAnalytics {
+  environment: string | null;
+  alerts: number;
+  requests: number;
+  percentage: number;
+}
+
+export interface TopRecurringError {
+  error_message: string | null;
+  count: number;
+  sources: string[];
+}
+
+export interface SourceErrorType {
+  source_name: string | null;
+  error_type: string;
+  count: number;
+}

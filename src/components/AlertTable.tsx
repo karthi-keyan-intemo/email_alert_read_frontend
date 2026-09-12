@@ -3,6 +3,11 @@ import { ErrorTypeBadge } from './ErrorTypeBadge';
 
 interface AlertTableProps {
   alerts: EmailAlertItem[];
+  filters: { environment: string; source_name: string; error_type: string; email_subject: string; error_message: string; azure_task: string; request_id: string; alert_timestamp_from: string; alert_timestamp_to: string };
+  onFilterChange: (field: string, value: string) => void;
+  sortField: string;
+  sortOrder: 'asc' | 'desc';
+  onSort: (field: string) => void;
   onOpenDetails: (alert: EmailAlertItem) => void;
   onRequestClick: (alert: EmailAlertItem) => void;
 }
@@ -25,20 +30,22 @@ function formatDate(value: string | null) {
   return date.toLocaleString();
 }
 
-export function AlertTable({ alerts, onOpenDetails, onRequestClick }: AlertTableProps) {
+export function AlertTable({ alerts, filters, onFilterChange, sortField, sortOrder, onSort, onOpenDetails, onRequestClick }: AlertTableProps) {
+  const sortIndicator = (field: string) => sortField === field ? (sortOrder === 'asc' ? ' ↑' : ' ↓') : ' ↕';
+  const filterInput = (field: string, placeholder: string) => <input value={filters[field as keyof typeof filters]} onChange={(event) => onFilterChange(field, event.target.value)} placeholder={placeholder} className="mt-2 w-full min-w-24 rounded border border-slate-300 px-2 py-1 text-xs font-normal text-slate-700" />;
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
           <thead className="bg-slate-50 text-slate-600">
             <tr>
-              <th className="px-4 py-3 font-semibold">Alert</th>
-              <th className="px-4 py-3 font-semibold">Environment</th>
-              <th className="px-4 py-3 font-semibold">Source</th>
-              <th className="px-4 py-3 font-semibold">Error Type</th>
-              <th className="px-4 py-3 font-semibold">Azure Task</th>
-              <th className="px-4 py-3 font-semibold">Alert Time</th>
-              <th className="px-4 py-3 font-semibold">Requests</th>
+              <th className="min-w-56 px-4 py-3 font-semibold"><button type="button" onClick={() => onSort('email_subject')}>Alert / Subject{sortIndicator('email_subject')}</button>{filterInput('email_subject', 'Search subject')}{filterInput('error_message', 'Search error')}</th>
+              <th className="min-w-36 px-4 py-3 font-semibold"><button type="button" onClick={() => onSort('environment')}>Environment{sortIndicator('environment')}</button><select value={filters.environment} onChange={(event) => onFilterChange('environment', event.target.value)} className="mt-2 w-full rounded border border-slate-300 px-2 py-1 text-xs font-normal"><option value="">All</option><option value="STAGING">STAGING</option><option value="PRODUCTION">PRODUCTION</option></select></th>
+              <th className="min-w-36 px-4 py-3 font-semibold"><button type="button" onClick={() => onSort('source_name')}>Source{sortIndicator('source_name')}</button>{filterInput('source_name', 'Search source')}</th>
+              <th className="min-w-44 px-4 py-3 font-semibold"><button type="button" onClick={() => onSort('error_type')}>Error Type{sortIndicator('error_type')}</button><select value={filters.error_type} onChange={(event) => onFilterChange('error_type', event.target.value)} className="mt-2 w-full rounded border border-slate-300 px-2 py-1 text-xs font-normal"><option value="">All</option><option value="UNKNOWN">UNKNOWN</option><option value="RESPONSE_VALIDATION">RESPONSE_VALIDATION</option></select></th>
+              <th className="min-w-48 px-4 py-3 font-semibold">Azure Task{filterInput('azure_task', 'Search task')}</th>
+              <th className="min-w-48 px-4 py-3 font-semibold"><button type="button" onClick={() => onSort('alert_timestamp')}>Alert Time{sortIndicator('alert_timestamp')}</button><div className="mt-2 grid gap-1"><input type="date" value={filters.alert_timestamp_from} onChange={(event) => onFilterChange('alert_timestamp_from', event.target.value)} className="w-full rounded border border-slate-300 px-1 py-1 text-xs font-normal" /><input type="date" value={filters.alert_timestamp_to} onChange={(event) => onFilterChange('alert_timestamp_to', event.target.value)} className="w-full rounded border border-slate-300 px-1 py-1 text-xs font-normal" /></div></th>
+              <th className="min-w-36 px-4 py-3 font-semibold">Requests{filterInput('request_id', 'Request ID')}</th>
               <th className="px-4 py-3 font-semibold">Actions</th>
             </tr>
           </thead>
