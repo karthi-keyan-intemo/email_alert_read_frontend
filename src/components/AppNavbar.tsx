@@ -8,9 +8,6 @@ export function AppNavbar() {
     <nav className="border-b border-slate-200 bg-white shadow-sm">
       <div className="mx-auto flex min-h-16 max-w-7xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-4 py-3 md:px-6 lg:px-8">
         <div className="flex min-w-0 flex-1 items-center gap-4 md:gap-6">
-          <button type="button" onClick={() => window.location.assign('/dashboard')} className="shrink-0 text-left text-lg font-semibold text-slate-900">
-            Email Alert Reader
-          </button>
           <div className="flex min-w-0 items-center gap-1 overflow-x-auto">
             <button type="button" onClick={() => window.location.assign('/dashboard')} className={`rounded-lg px-3 py-2 text-sm font-medium ${currentPath === '/dashboard' || currentPath === '/' ? 'bg-sky-50 text-sky-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'}`}>
               Dashboard
